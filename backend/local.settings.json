@@ -1,0 +1,12 @@
+{
+  "IsEncrypted": false,
+  "Values": {
+    "AzureWebJobsStorage": "UseDevelopmentStorage=true",
+    "FUNCTIONS_WORKER_RUNTIME": "python",
+    "COSMOS_DB_KEY": "sEPfSGe7uaWqvTgJUP5GuuIMkJBoZU1JW1LYtZ39y4Uuq3WKxJacpU5ynR5BGMFvqcChnu1JnGEzACDbsdHBIg==",
+    "COSMOS_DB_URL": "https://rccdb-nosql.documents.azure.com:443/"
+},
+    "Host": {
+        "CORS": "*"
+    }
+    }

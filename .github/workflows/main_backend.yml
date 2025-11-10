@@ -61,10 +61,10 @@ jobs:
       contents: read
 
     steps:
-      - name: Download artifact from build job
-        uses: actions/download-artifact@v4
-        with:
-          name: python-app
+      #- name: Download artifact from build job
+       # uses: actions/download-artifact@v4
+        #with:
+         # name: python-app
 
       # 🔐 Login to Azure using OIDC federated credentials
       - name: Login to Azure

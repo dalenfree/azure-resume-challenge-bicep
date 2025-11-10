@@ -9,7 +9,7 @@ on:
   workflow_dispatch:
 
 env:
-  AZURE_FUNCTIONAPP_PACKAGE_PATH: backend/
+  AZURE_FUNCTIONAPP_PACKAGE_PATH: backend
   PYTHON_VERSION: '3.11'
   AZURE_FUNCTIONAPP_NAME: '${{secrets.FUNCTIONAPP_NAME}}'  # your Azure Function App name
 
@@ -43,15 +43,15 @@ jobs:
         run: |
           python -m pytest --maxfail=1 --disable-warnings -q
 
-   #   - name: Zip deployment package
-   #     working-directory: ${{ env.AZURE_FUNCTIONAPP_PACKAGE_PATH }}
-   #     run: zip -r ../release.zip .
+      - name: Zip deployment package
+        working-directory: ${{ env.AZURE_FUNCTIONAPP_PACKAGE_PATH }}
+        run: zip -r ../release.zip .
 
-   #   - name: Upload build artifact
-   #     uses: actions/upload-artifact@v4
-   #     with:
-   #       name: python-app
-   #       path: release.zip
+      - name: Upload build artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: python-app
+          path: release.zip
 
   deploy:
     runs-on: ubuntu-latest
@@ -61,10 +61,10 @@ jobs:
       contents: read
 
     steps:
-      #- name: Download artifact from build job
-       # uses: actions/download-artifact@v4
-        #with:
-         # name: python-app
+      - name: Download artifact from build job
+        uses: actions/download-artifact@v4
+        with:
+          name: python-app
 
       # 🔐 Login to Azure using OIDC federated credentials
       - name: Login to Azure
@@ -79,7 +79,6 @@ jobs:
         uses: Azure/functions-action@v1
         with:
           app-name: ${{ env.AZURE_FUNCTIONAPP_NAME }}
-          #package: 'release.zip'
-          package: ${{ env.AZURE_FUNCTIONAPP_PACKAGE_PATH }}
+          package: 'release.zip'
           scm-do-build-during-deployment: true
           enable-oryx-build: true

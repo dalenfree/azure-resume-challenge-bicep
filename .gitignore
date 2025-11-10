@@ -1,3 +1,5 @@
 /.vscode
 backend/local.settings.json
 backend/__pycache__/
+.python_packages
+.venv

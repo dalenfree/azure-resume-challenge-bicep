@@ -43,15 +43,15 @@ jobs:
         run: |
           python -m pytest --maxfail=1 --disable-warnings -q
 
-      - name: Zip deployment package
-        working-directory: ${{ env.AZURE_FUNCTIONAPP_PACKAGE_PATH }}
-        run: zip -r ../release.zip * .azurefunctions
+   #   - name: Zip deployment package
+   #     working-directory: ${{ env.AZURE_FUNCTIONAPP_PACKAGE_PATH }}
+   #     run: zip -r ../release.zip .
 
-      - name: Upload build artifact
-        uses: actions/upload-artifact@v4
-        with:
-          name: python-app
-          path: release.zip
+   #   - name: Upload build artifact
+   #     uses: actions/upload-artifact@v4
+   #     with:
+   #       name: python-app
+   #       path: release.zip
 
   deploy:
     runs-on: ubuntu-latest
@@ -79,6 +79,7 @@ jobs:
         uses: Azure/functions-action@v1
         with:
           app-name: ${{ env.AZURE_FUNCTIONAPP_NAME }}
-          package: 'release.zip'
+          #package: 'release.zip'
+          package: ${{ env.AZURE_FUNCTIONAPP_PACKAGE_PATH }}
           scm-do-build-during-deployment: true
           enable-oryx-build: true

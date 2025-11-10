@@ -42,10 +42,10 @@ jobs:
         run: |
           python -m pytest --maxfail=1 --disable-warnings -q
 
-      - name: Zip deployment package
-        run: |
-          cd ${{ env.AZURE_FUNCTIONAPP_PACKAGE_PATH }}
-          zip -r ../release.zip * .[^.]* -x "*.git*" "__pycache__/*"
+  #    - name: Zip deployment package
+  #      run: |
+  #        cd ${{ env.AZURE_FUNCTIONAPP_PACKAGE_PATH }}
+  #        zip -r ../release.zip * .[^.]* -x "*.git*" "__pycache__/*"
 
       - name: Upload build artifact
         uses: actions/upload-artifact@v4
@@ -74,11 +74,18 @@ jobs:
           tenant-id: ${{ secrets.AZURE_TENANT_ID }}
           subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
 
-      # 🚀 Deploy to Azure Function App
+ #     # 🚀 Deploy to Azure Function App
+  #    - name: Deploy to Azure Function App
+   #     uses: Azure/functions-action@v1
+    #    with:
+     #     app-name: ${{ env.AZURE_FUNCTIONAPP_NAME }}
+      #    package: 'release.zip'
+       ##  enable-oryx-build: true
+  
       - name: Deploy to Azure Function App
         uses: Azure/functions-action@v1
         with:
           app-name: ${{ env.AZURE_FUNCTIONAPP_NAME }}
-          package: 'release.zip'
+          package: ${{ env.AZURE_FUNCTIONAPP_PACKAGE_PATH }}
           scm-do-build-during-deployment: true
           enable-oryx-build: true

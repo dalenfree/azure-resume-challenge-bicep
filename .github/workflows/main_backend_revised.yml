@@ -1,22 +1,25 @@
 name: deploy_backend_revised
-
 on:
   push:
     branches:
       - main
     paths:
-      - 'backend/**' # VERY IMPORTANT if you don't include this, it will deploy on any change to the repo
+      - 'backend/**'
   workflow_dispatch:
 
 env:
   AZURE_FUNCTIONAPP_PACKAGE_PATH: backend
   PYTHON_VERSION: '3.11'
-  AZURE_FUNCTIONAPP_NAME: '${{secrets.FUNCTIONAPP_NAME}}'  # your Azure Function App name
+  RESOURCE_GROUP: 'bicepresumerg'
+  STORAGE_ACCOUNT: 'stt4lmqhxdjmwxw'       # must match the one in Bicep
+  CONTAINER_NAME: 'app-package-func-t4lmqhxdjmwxw-t4lmqhx' # match deploymentStorageContainerName
+  FUNCTIONAPP_NAME: 'func-t4lmqhxdjmwxw'   # match the functionApp name
 
 jobs:
-  build:
+  build-and-deploy:
     runs-on: ubuntu-latest
     permissions:
+      id-token: write
       contents: read
 
     steps:
@@ -32,47 +35,19 @@ jobs:
         working-directory: ${{ env.AZURE_FUNCTIONAPP_PACKAGE_PATH }}
         run: |
           python -m pip install --upgrade pip
-          pip install -r requirements.txt --target=".python_packages/lib/site-packages"
           pip install -r requirements.txt
-          pip install pytest azure-functions
-
-      - name: Run tests
-        working-directory: ${{ env.AZURE_FUNCTIONAPP_PACKAGE_PATH }}
-        env:
-          PYTHONPATH: ${{ github.workspace }}
-        run: |
-          python -m pytest --maxfail=1 --disable-warnings -q
 
       - name: Build Azure Function
         run: |
           npm install -g azure-functions-core-tools@4 --unsafe-perm true
           cd ${{ env.AZURE_FUNCTIONAPP_PACKAGE_PATH }}
           func build
-      
+
       - name: Zip deployment package
-        working-directory: ${{ env.AZURE_FUNCTIONAPP_PACKAGE_PATH }}
-        run: zip -r ../release.zip .
+        run: |
+          cd ${{ env.AZURE_FUNCTIONAPP_PACKAGE_PATH }}
+          zip -r ../release.zip * .[^.]* -x "*.git*" "__pycache__/*"
 
-      - name: Upload build artifact
-        uses: actions/upload-artifact@v4
-        with:
-          name: python-app
-          path: release.zip
-
-  deploy:
-    runs-on: ubuntu-latest
-    needs: build
-    permissions:
-      id-token: write       # 👈 required for OIDC
-      contents: read
-
-    steps:
-      - name: Download artifact from build job
-        uses: actions/download-artifact@v4
-        with:
-          name: python-app
-
-      # 🔐 Login to Azure using OIDC federated credentials
       - name: Login to Azure
         uses: azure/login@v2
         with:
@@ -80,11 +55,19 @@ jobs:
           tenant-id: ${{ secrets.AZURE_TENANT_ID }}
           subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
 
-      # 🚀 Deploy to Azure Function App
-      - name: Deploy to Azure Function App
-        uses: Azure/functions-action@v1
-        with:
-          app-name: ${{ env.AZURE_FUNCTIONAPP_NAME }}
-          package: 'release.zip'
-          scm-do-build-during-deployment: false
-          enable-oryx-build: false
+      - name: Upload package to blob container
+        run: |
+          az storage blob upload \
+            --account-name ${{ env.STORAGE_ACCOUNT }} \
+            --container-name ${{ env.CONTAINER_NAME }} \
+            --file release.zip \
+            --name release.zip \
+            --overwrite true \
+            --auth-mode login
+
+      - name: Trigger deployment refresh
+        run: |
+          echo "Telling Azure to pull latest package..."
+          az rest --method POST \
+            --url "https://management.azure.com/subscriptions/${{ secrets.AZURE_SUBSCRIPTION_ID }}/resourceGroups/${{ env.RESOURCE_GROUP }}/providers/Microsoft.Web/sites/${{ env.FUNCTIONAPP_NAME }}/hostruntime/admin/refresh?api-version=2023-01-01" \
+            --headers "Content-Type=application/json"

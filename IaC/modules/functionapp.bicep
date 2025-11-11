@@ -11,11 +11,11 @@ param location string = resourceGroup().location
 
 @description('Language runtime used by the function app.')
 @allowed(['dotnet-isolated','python','java', 'node', 'powerShell'])
-param functionAppRuntime string = 'dotnet-isolated' //Defaults to .NET isolated worker
+param functionAppRuntime string = 'python' //Defaults to python
 
 @description('Target language version used by the function app.')
 @allowed(['3.10','3.11', '7.4', '8.0', '9.0', '10', '11', '17', '20'])
-param functionAppRuntimeVersion string = '8.0' //Defaults to .NET 8.
+param functionAppRuntimeVersion string = '3.11' //Defaults to python 3.11
 
 @description('The maximum scale-out instance count limit for the app.')
 @minValue(40)

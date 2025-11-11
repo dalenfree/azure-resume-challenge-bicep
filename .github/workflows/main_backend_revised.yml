@@ -1,4 +1,4 @@
-name: deploy_backend
+name: deploy_backend_revised
 
 on:
   push:
@@ -43,6 +43,12 @@ jobs:
         run: |
           python -m pytest --maxfail=1 --disable-warnings -q
 
+      - name: Build Azure Function
+        run: |
+          npm install -g azure-functions-core-tools@4 --unsafe-perm true
+          cd ${{ env.AZURE_FUNCTIONAPP_PACKAGE_PATH }}
+          func build
+      
       - name: Zip deployment package
         working-directory: ${{ env.AZURE_FUNCTIONAPP_PACKAGE_PATH }}
         run: zip -r ../release.zip .

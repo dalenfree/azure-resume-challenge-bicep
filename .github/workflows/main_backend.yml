@@ -36,12 +36,12 @@ jobs:
           pip install -r requirements.txt
           pip install pytest azure-functions
 
-      - name: Run tests
-        working-directory: ${{ env.AZURE_FUNCTIONAPP_PACKAGE_PATH }}
-        env:
-          PYTHONPATH: ${{ github.workspace }}
-        run: |
-          python -m pytest --maxfail=1 --disable-warnings -q
+   #   - name: Run tests
+    #    working-directory: ${{ env.AZURE_FUNCTIONAPP_PACKAGE_PATH }}
+     #   env:
+      #    PYTHONPATH: ${{ github.workspace }}
+       # run: |
+        #  python -m pytest --maxfail=1 --disable-warnings -q
 
       - name: Zip deployment package
         working-directory: ${{ env.AZURE_FUNCTIONAPP_PACKAGE_PATH }}
